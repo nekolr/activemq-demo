@@ -42,7 +42,7 @@
         <property name="targetConnectionFactory" ref="pooledConnectionFactory"/>
     </bean>
 
-    <!-- 定义 JmsTemplate 的 Queue 类型 -->
+    <!-- 队列模式的 JmsTemplate -->
     <bean id="jmsQueueTemplate" class="org.springframework.jms.core.JmsTemplate">
         <constructor-arg ref="connectionFactory"/>
         <!-- PTP 模型（一对一），即队列模式 -->
@@ -50,7 +50,7 @@
         <property name="messageConverter" ref="jmsMessageConverter"></property>
     </bean>
 
-    <!-- 定义 JmsTemplate 的 Topic 类型 -->
+    <!-- 发布/订阅模式的 JmsTemplate -->
     <bean id="jmsTopicTemplate" class="org.springframework.jms.core.JmsTemplate">
         <property name="connectionFactory" ref="connectionFactory"/>
         <!-- pub/sub 模型（发布/订阅），一对多 -->
@@ -72,12 +72,12 @@
     <bean id="jmsMessageConverter" class="org.springframework.jms.support.converter.SimpleMessageConverter"/>
 
     <!-- 消息监听 -->
-    <bean id="messageListener" class="com.nekolr.activemq.consumer.listener.SendMessageListener"/>
+    <bean id="emailMessageListener" class="com.nekolr.example.consumer.EmailMessageListener"/>
 
     <!-- 消息监听容器 -->
-    <bean id="messageListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+    <bean id="emailMessageListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
         <property name="connectionFactory" ref="connectionFactory"/>
         <property name="destination" ref="defaultQueueDestination"/>
-        <property name="messageListener" ref="messageListener"/>
+        <property name="messageListener" ref="emailMessageListener"/>
     </bean>
 </beans>

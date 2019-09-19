@@ -1,5 +1,7 @@
-package com.nekolr.activemq.consumer.listener;
+package com.nekolr.example.consumer;
 
+import com.nekolr.example.entity.EmailEntity;
+import com.nekolr.example.util.EmailUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.support.converter.MessageConverter;
 
@@ -7,20 +9,17 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 
-/**
- * 使用 MessageListener 可以异步接收消息
- */
-public class SendMessageListener implements MessageListener {
-
+public class EmailMessageListener implements MessageListener {
     @Autowired
     private MessageConverter messageConverter;
 
     @Override
     public void onMessage(Message message) {
+        EmailEntity emailEntity;
         try {
-            Object msg = messageConverter.fromMessage(message);
-            if (msg != null) {
-                System.out.println(msg);
+            emailEntity = (EmailEntity) messageConverter.fromMessage(message);
+            if (emailEntity != null) {
+                EmailUtils.sendEmail(emailEntity);
             }
         } catch (JMSException e) {
             e.printStackTrace();
