@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="com.nekolr.*"/>
+
+    <!-- 引入配置文件 -->
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:application.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- 连接工厂 -->
+    <bean id="activeConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${activemq.brokerUrl}"></property>
+        <property name="userName" value="${activemq.userName}"></property>
+        <property name="password" value="${activemq.password}"></property>
+        <!-- 是否异步发送消息。将该值开启官方说法是可以取得更高的发送速度（5倍） -->
+        <property name="useAsyncSend" value="true"></property>
+        <!-- 异步发送消息 -->
+        <property name="alwaysSessionAsync" value="true"></property>
+        <property name="trustAllPackages" value="true"></property>
+    </bean>
+
+    <!--
+        ActiveMQ 为我们提供了一个 PooledConnectionFactory，通过往里面注入一个 ActiveMQConnectionFactory，可以用来将
+        Connection、Session 和 MessageProducer 池化，这样可以大大的减少我们的资源消耗。依赖于 activemq-pool 包
+    -->
+    <bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
+        <property name="connectionFactory" ref="activeConnectionFactory"/>
+        <property name="maxConnections" value="${activemq.pool.maxConnections}"/>
+    </bean>
+
+    <!-- Spring 用于管理真正的连接工厂的 ConnectionFactory -->
+    <bean id="connectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+        <!-- 目标 ConnectionFactory 对应真实的可以产生 JMS Connection 的 ConnectionFactory -->
+        <property name="targetConnectionFactory" ref="pooledConnectionFactory"/>
+    </bean>
+
+    <!-- 定义 JmsTemplate 的 Queue 类型 -->
+    <bean id="jmsQueueTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <constructor-arg ref="connectionFactory"/>
+        <!-- PTP 模型（一对一），即队列模式 -->
+        <property name="pubSubDomain" value="false"/>
+        <property name="messageConverter" ref="jmsMessageConverter"></property>
+    </bean>
+
+    <!-- 定义 JmsTemplate 的 Topic 类型 -->
+    <bean id="jmsTopicTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <!-- pub/sub 模型（发布/订阅），一对多 -->
+        <property name="pubSubDomain" value="true"/>
+        <property name="messageConverter" ref="jmsMessageConverter"></property>
+    </bean>
+
+    <!-- PTP Destination -->
+    <bean id="defaultQueueDestination" class="org.apache.activemq.command.ActiveMQQueue">
+        <property name="physicalName" value="org.apache.activemq.test.defaultQueue"></property>
+    </bean>
+
+    <!-- Pub/Sub Destination -->
+    <bean id="defaultTopicDestination" class="org.apache.activemq.command.ActiveMQTopic">
+        <property name="physicalName" value="org.apache.activemq.test.defaultTopic"></property>
+    </bean>
+
+    <!-- 消息转换器 -->
+    <bean id="jmsMessageConverter" class="org.springframework.jms.support.converter.SimpleMessageConverter"/>
+
+    <!-- 消息监听 -->
+    <bean id="messageListener" class="com.nekolr.activemq.consumer.listener.SendMessageListener"/>
+
+    <!-- 消息监听容器 -->
+    <bean id="messageListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="destination" ref="defaultQueueDestination"/>
+        <property name="messageListener" ref="messageListener"/>
+    </bean>
+</beans>
