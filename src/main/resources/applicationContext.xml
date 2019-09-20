@@ -2,7 +2,9 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
+       http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
 
     <context:component-scan base-package="com.nekolr.*"/>
 
@@ -15,16 +17,23 @@
         </property>
     </bean>
 
+    <!-- Broker -->
+    <broker useJmx="false" persistent="true" brokerName="localhost" xmlns="http://activemq.apache.org/schema/core">
+        <managementContext>
+            <managementContext createConnector="true"/>
+        </managementContext>
+    </broker>
+
     <!-- 连接工厂 -->
     <bean id="activeConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
-        <property name="brokerURL" value="${activemq.brokerUrl}"></property>
-        <property name="userName" value="${activemq.userName}"></property>
-        <property name="password" value="${activemq.password}"></property>
+        <property name="brokerURL" value="${activemq.brokerUrl}"/>
+        <property name="userName" value="${activemq.userName}"/>
+        <property name="password" value="${activemq.password}"/>
         <!-- 是否异步发送消息。将该值开启官方说法是可以取得更高的发送速度（5倍） -->
-        <property name="useAsyncSend" value="true"></property>
+        <property name="useAsyncSend" value="true"/>
         <!-- 异步发送消息 -->
-        <property name="alwaysSessionAsync" value="true"></property>
-        <property name="trustAllPackages" value="true"></property>
+        <property name="alwaysSessionAsync" value="true"/>
+        <property name="trustAllPackages" value="true"/>
     </bean>
 
     <!--
@@ -47,7 +56,7 @@
         <constructor-arg ref="connectionFactory"/>
         <!-- PTP 模型（一对一），即队列模式 -->
         <property name="pubSubDomain" value="false"/>
-        <property name="messageConverter" ref="simpleMessageConverter"></property>
+        <property name="messageConverter" ref="simpleMessageConverter"/>
     </bean>
 
     <!-- 发布/订阅模式的 JmsTemplate -->
@@ -55,17 +64,17 @@
         <property name="connectionFactory" ref="connectionFactory"/>
         <!-- pub/sub 模型（发布/订阅），一对多 -->
         <property name="pubSubDomain" value="true"/>
-        <property name="messageConverter" ref="simpleMessageConverter"></property>
+        <property name="messageConverter" ref="simpleMessageConverter"/>
     </bean>
 
     <!-- PTP Destination -->
     <bean id="defaultQueueDestination" class="org.apache.activemq.command.ActiveMQQueue">
-        <property name="physicalName" value="org.apache.activemq.test.defaultQueue"></property>
+        <property name="physicalName" value="org.apache.activemq.test.defaultQueue"/>
     </bean>
 
     <!-- Pub/Sub Destination -->
     <bean id="defaultTopicDestination" class="org.apache.activemq.command.ActiveMQTopic">
-        <property name="physicalName" value="org.apache.activemq.test.defaultTopic"></property>
+        <property name="physicalName" value="org.apache.activemq.test.defaultTopic"/>
     </bean>
 
     <!-- 消息转换器 -->
