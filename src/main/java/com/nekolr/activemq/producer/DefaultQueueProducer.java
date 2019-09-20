@@ -9,7 +9,7 @@ import javax.annotation.Resource;
  * @author nekolr
  */
 @Component
-public abstract class AbstractQueueProducer implements QueueProducer {
+public class DefaultQueueProducer implements QueueProducer {
 
     @Resource(name = "jmsQueueTemplate")
     private JmsTemplate jmsQueueTemplate;

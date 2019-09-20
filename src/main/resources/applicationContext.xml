@@ -47,7 +47,7 @@
         <constructor-arg ref="connectionFactory"/>
         <!-- PTP 模型（一对一），即队列模式 -->
         <property name="pubSubDomain" value="false"/>
-        <property name="messageConverter" ref="jmsMessageConverter"></property>
+        <property name="messageConverter" ref="simpleMessageConverter"></property>
     </bean>
 
     <!-- 发布/订阅模式的 JmsTemplate -->
@@ -55,7 +55,7 @@
         <property name="connectionFactory" ref="connectionFactory"/>
         <!-- pub/sub 模型（发布/订阅），一对多 -->
         <property name="pubSubDomain" value="true"/>
-        <property name="messageConverter" ref="jmsMessageConverter"></property>
+        <property name="messageConverter" ref="simpleMessageConverter"></property>
     </bean>
 
     <!-- PTP Destination -->
@@ -69,15 +69,35 @@
     </bean>
 
     <!-- 消息转换器 -->
-    <bean id="jmsMessageConverter" class="org.springframework.jms.support.converter.SimpleMessageConverter"/>
+    <bean id="simpleMessageConverter" class="org.springframework.jms.support.converter.SimpleMessageConverter"/>
 
     <!-- 消息监听 -->
     <bean id="emailMessageListener" class="com.nekolr.example.consumer.EmailMessageListener"/>
+
+    <!-- 消费者 -->
+    <bean id="smsQueueConsumer" class="com.nekolr.example.consumer.SmsQueueConsumer"/>
+
+    <!-- 消息监听 -->
+    <bean id="smsMessageListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter">
+        <!-- 真正的消费者 -->
+        <constructor-arg ref="smsQueueConsumer"/>
+        <!--  may be other method -->
+        <property name="defaultListenerMethod" value="receive"/>
+        <!-- MessageConverter define -->
+        <property name="messageConverter" ref="simpleMessageConverter"/>
+    </bean>
 
     <!-- 消息监听容器 -->
     <bean id="emailMessageListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
         <property name="connectionFactory" ref="connectionFactory"/>
         <property name="destination" ref="defaultQueueDestination"/>
         <property name="messageListener" ref="emailMessageListener"/>
+    </bean>
+
+    <!-- 消息监听容器 -->
+    <bean id="smsMessageListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="destination" ref="defaultQueueDestination"/>
+        <property name="messageListener" ref="smsMessageListener"/>
     </bean>
 </beans>

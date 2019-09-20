@@ -2,15 +2,19 @@ package com.nekolr.example.consumer;
 
 import com.nekolr.example.entity.EmailEntity;
 import com.nekolr.example.util.EmailUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.support.converter.MessageConverter;
 
+import javax.annotation.Resource;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 
+/**
+ * 异步接收消息
+ */
 public class EmailMessageListener implements MessageListener {
-    @Autowired
+
+    @Resource(name = "simpleMessageConverter")
     private MessageConverter messageConverter;
 
     @Override

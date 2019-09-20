@@ -9,7 +9,7 @@ import javax.annotation.Resource;
  * @author nekolr
  */
 @Component
-public class AbstractTopicProducer implements TopicProducer {
+public class DefaultTopicProducer implements TopicProducer {
 
     @Resource(name = "jmsTopicTemplate")
     private JmsTemplate jmsTopicTemplate;
