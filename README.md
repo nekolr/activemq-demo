@@ -1,0 +1,5 @@
+- 当使用嵌入式的 ActiveMQ（即 Broker 与项目代码在同一个 JVM 中运行）时，可以设置 brokerUrl 为 vm://localhost，这样客户端和代理端之间可以直接通信而不需要占用网络通道。
+- 可以选择关闭 ActiveMQ 的消息持久化，这样就不需要用到 `activemq-kahadb-store`。
+- 使用 Spring 根据 JMS 规范封装的 `JmsTemplate` 可以发送和接收消息。
+- 消息转换需要实现 `MessageConverter` 接口。
+- 如果想异步接收消息，则需要使用消息监听。除了 JMS 规范中的 `MessageListener`，还有 Spring 提供的 `SessionAwareMessageListener` 和 `MessageListenerAdapter`。
